@@ -390,18 +390,17 @@ namespace SnmpSharpNet
 			EndPoint ep = (EndPoint)_receivePeer;
 			try
 			{
+			    _requestState.Timer = new Timer(new TimerCallback(AsyncRequestTimerCallback), null, _requestState.Timeout, System.Threading.Timeout.Infinite);
 				_socket.BeginReceiveFrom(_inBuffer, 0, _inBuffer.Length, SocketFlags.None, ref ep, new AsyncCallback(ReceiveFromCallback), null);
 			}
 			catch
 			{
-
 				// retry on every error. this can be done better by evaluating the returned
 				// error value but it's a lot of work and for a non-acked protocol, just send it again
 				// until you reach max retries.
 				RetryAsyncRequest();
 				return;
 			}
-			_requestState.Timer = new Timer(new TimerCallback(AsyncRequestTimerCallback), null, _requestState.Timeout, System.Threading.Timeout.Infinite);
 		}
 		/// <summary>
 		/// Internal retry function. Checks if request has reached maximum number of retries and either resends the request if not reached,
